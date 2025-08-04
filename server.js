@@ -27,10 +27,17 @@ app.get('/test', (req, res) => {
   res.send('Сервер работает!');
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}`);
 });
 
+// Обработка непредвиденных ошибок
+process.on('uncaughtException', (err) => {
+  console.error('Непредвиденная ошибка:', err);
 });
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Необработанное отклонение промиса:', promise, 'причина:', reason);
+});
+
 
