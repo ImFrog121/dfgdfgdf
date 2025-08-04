@@ -3,14 +3,9 @@ const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
 
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
-
-// Отдаем статические файлы из папки public
+// Используйте __dirname для получения абсолютного пути
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Обработчик корневого пути
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -54,4 +49,5 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}`);
+
 });
