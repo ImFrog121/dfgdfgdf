@@ -1,53 +1,36 @@
 const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
+const app = express();
 const path = require('path');
+const fs = require('fs');
 
-// Используйте __dirname для получения абсолютного пути
-app.use(express.static(path.join(__dirname, 'public')));
+// Проверка существования public/index.html
+const publicDir = path.join(__dirname, 'public');
+const indexPath = path.join(publicDir, 'index.html');
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+console.log("Проверяем путь:", indexPath);
 
-// Хранилище пользователей
-const users = {};
+if (!fs.existsSync(publicDir)) {
+  console.error("Папка public не существует!");
+  fs.mkdirSync(publicDir);
+}
 
-// Обработка подключений Socket.io
-io.on('connection', (socket) => {
-  console.log('Новый пользователь подключен:', socket.id);
+if (!fs.existsSync(indexPath)) {
+  console.error("index.html не найден! Создаем временный файл...");
+  fs.writeFileSync(indexPath, '<h1>Neon Messenger работает!</h1>');
+}
 
-  // Регистрация пользователя
-  socket.on('register', (username) => {
-    users[socket.id] = username;
-    io.emit('user-list', Object.values(users));
-    socket.broadcast.emit('user-connected', username);
-  });
+// Статические файлы
+app.use(express.static(publicDir));
 
-  // Отправка сообщений
-  socket.on('message', (data) => {
-    const { message } = data;
-    const username = users[socket.id];
-    io.emit('message', {
-      username,
-      message,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
-  });
-
-  // Отключение пользователя
-  socket.on('disconnect', () => {
-    const username = users[socket.id];
-    delete users[socket.id];
-    io.emit('user-list', Object.values(users));
-    if (username) {
-      socket.broadcast.emit('user-disconnected', username);
-    }
-  });
+// Простой роут для проверки
+app.get('/test', (req, res) => {
+  res.send('Сервер работает!');
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}`);
+});
 
 });
+
